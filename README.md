@@ -5,6 +5,6 @@ The title pretty much explains it.
 
 ## Install
 
-There will be a requirements.txt file soon
+`pip install -r requirements.txt`
 
 `python app.py`
