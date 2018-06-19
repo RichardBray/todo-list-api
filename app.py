@@ -12,12 +12,11 @@ def get_json_arg(req_body, arg):
     """
     Gets argument from JSON
     """
-    # json.loads(self.request.body).get('name')
     return json.loads(req_body).get(arg)
 
 
 class PageHandler(RequestHandler):
-    def json_response(self, data, status_code):
+    def json_response(self, data, status_code=200):
         self.set_status(status_code)
         self.set_header("Content-Type", 'application/json')
         self.write(data)
@@ -25,14 +24,16 @@ class PageHandler(RequestHandler):
 
 class TodoItems(PageHandler):
     def get(self):
-        self.json_response(json.dumps(items), 200)
+        self.json_response(json.dumps(items))
 
 
 class TodoItem(PageHandler):
-    def get(self, name):
-        if name:
-            picked_item = filter(lambda item: item['name'] == name, items)
-            self.json_response(picked_item, 200)
+    def get(self, id):
+        if id:
+            item = list(filter(lambda item: item['id'] == int(id), items))
+            # REVIEW Object of type 'filter' is not JSON serializable
+            # This also needs to be a list
+            self.json_response(json.dumps(item[0]))
         else:
             result = {'message': 'body is empty'}
             self.json_response(result, 404)
@@ -40,12 +41,31 @@ class TodoItem(PageHandler):
     def post(self):
         if self.request.body:
             name = get_json_arg(self.request.body, 'name')
-            item = {'name': name}
+            id = get_json_arg(self.request.body, 'id')
+            item = {'id': id, 'name': name}
             items.append(item)
             self.json_response(item, 201)
         else:
             result = {'message': 'body is empty'}
             self.json_response(result, 404)
+
+    def put(self, id):
+        picked_item = list(filter(lambda item: item['id'] == int(id), items))
+        # REVIEW TypeError: 'filter' object is not subscriptable
+        # Making it a list fixed the error why?
+        if picked_item:
+            items.remove(picked_item[0])
+            name = get_json_arg(self.request.body, 'name')
+            item = {'id': int(id), 'name': name}
+            items.append(item)
+            self.json_response(item)
+
+    def delete(self, id):
+        global items
+        new_items = list(filter(lambda item: item['id'] != int(id), items))
+        items = new_items
+        message = {'message': 'Item with id "{}" was deleted'.format(id)}
+        self.json_response(message)
 
 
 class InitialiseApp(Application):
@@ -68,12 +88,6 @@ def run_erver():
     app = InitialiseApp()
     app.listen(3000)
     IOLoop.instance().start()
-
-
-# def json_response(self, data):
-#     self.set_header("Content-Type", 'application/json')
-#     self.write(json_encode(data))
-#     self.finish()
 
 
 if __name__ == '__main__':
