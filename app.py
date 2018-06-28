@@ -2,17 +2,28 @@
 # from tornado import gen
 # import tornado.web
 from tornado.web import (Application, RequestHandler)
-from tornado.ioloop import IOLoop  # input output loop
+from tornado.ioloop import IOLoop
 import json
 
 items = []
 
 
-def get_json_arg(req_body, arg):
+def get_json_arg(req_body, fields):
     """
     Gets argument from JSON
     """
-    return json.loads(req_body).get(arg)
+    results = {}
+    for i in fields:
+        results[i] = json.loads(req_body).get(i)
+    return results
+
+
+def get_filtered(id):
+    """
+    Filters list to pick one item
+    """
+    result = [item for item in items if item['id'] == int(id)]
+    return result
 
 
 class PageHandler(RequestHandler):
@@ -21,6 +32,9 @@ class PageHandler(RequestHandler):
         self.set_header("Content-Type", 'application/json')
         self.write(data)
 
+    def json_error(self):
+        self.json_response({'message': 'body is empty'}, 404)
+
 
 class TodoItems(PageHandler):
     def get(self):
@@ -28,43 +42,37 @@ class TodoItems(PageHandler):
 
 
 class TodoItem(PageHandler):
-    def get(self, id):
+
+    def get(self, id=None):
         if id:
-            item = list(filter(lambda item: item['id'] == int(id), items))
-            # REVIEW Object of type 'filter' is not JSON serializable
-            # This also needs to be a list
+            item = get_filtered(id)
             self.json_response(json.dumps(item[0]))
         else:
-            result = {'message': 'body is empty'}
-            self.json_response(result, 404)
+            self.json_error()
 
-    def post(self):
+    def post(self, id=None):
+        print(id)
         if self.request.body:
-            name = get_json_arg(self.request.body, 'name')
-            id = get_json_arg(self.request.body, 'id')
-            item = {'id': id, 'name': name}
+            item = get_json_arg(self.request.body, ['name', 'id'])
             items.append(item)
             self.json_response(item, 201)
         else:
-            result = {'message': 'body is empty'}
-            self.json_response(result, 404)
+            self.json_error()
 
     def put(self, id):
-        picked_item = list(filter(lambda item: item['id'] == int(id), items))
-        # REVIEW TypeError: 'filter' object is not subscriptable
-        # Making it a list fixed the error why?
+        picked_item = get_filtered(id)
         if picked_item:
             items.remove(picked_item[0])
-            name = get_json_arg(self.request.body, 'name')
-            item = {'id': int(id), 'name': name}
+            item = get_json_arg(self.request.body, ['name'])
+            item['id'] = int(id)
             items.append(item)
             self.json_response(item)
 
     def delete(self, id):
         global items
-        new_items = list(filter(lambda item: item['id'] != int(id), items))
+        new_items = [item for item in items if item['id'] != int(id)]
         items = new_items
-        message = {'message': 'Item with id "{}" was deleted'.format(id)}
+        message = {'message': 'Item with id {} was deleted'.format(id)}
         self.json_response(message)
 
 
@@ -72,8 +80,7 @@ class InitialiseApp(Application):
     def __init__(self):
         handlers = [
             (r"/", TodoItems),
-            (r"/api/v1/item/", TodoItem),
-            (r"/api/v1/item/([^/]+)", TodoItem)
+            (r"/api/v1/item/([^/]+)?", TodoItem)
         ]
 
         server_settings = {
@@ -84,11 +91,11 @@ class InitialiseApp(Application):
         Application.__init__(self, handlers, **server_settings)
 
 
-def run_erver():
+def run_server():
     app = InitialiseApp()
     app.listen(3000)
     IOLoop.instance().start()
 
 
 if __name__ == '__main__':
-    run_erver()
+    run_server()
