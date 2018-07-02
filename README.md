@@ -28,3 +28,12 @@ result = [item for item in items if item['id'] == int(id)]
 ```
 
 ## SQL Queries
+
+Create Schema
+```
+CREATE SCHEMA `<schema_name>` ;
+```
+
+```
+cursor.execute("SELECT VERSION()")  # Test database connected
+```

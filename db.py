@@ -1,13 +1,22 @@
 import MySQLdb
 
 # instance, user, password, database
-db = MySQLdb.connect("localhost", "root", "", "octopus-portal")
+db = MySQLdb.connect("localhost", "root", "", "todo_list")
 
 cursor = db.cursor()
 
-cursor.execute("SELECT VERSION()")
+create_table = """
+                DROP TABLE IF EXISTS items;
+                CREATE TABLE items (
+                id int(9) auto_increment primary key,
+                name char(20))"""
 
-data = cursor.fetchone()
-print("Database version : %s " % data)
+cursor.execute(create_table)
+
+results = cursor.fetchall()
+
+print(results)
+# data = cursor.fetchone()  # Fetch a single row
+# print("Database version : %s " % data)
 
 db.close()
