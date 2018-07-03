@@ -29,11 +29,17 @@ result = [item for item in items if item['id'] == int(id)]
 
 ## SQL Queries
 
-Create Schema
-```
-CREATE SCHEMA `<schema_name>` ;
+Create Schema or Database
+```sql
+CREATE SCHEMA `<schema_name>`;
+CREATE DATABASE `<database_name>`;
 ```
 
+Choose database
+```sql
+USE <database_name>
 ```
+
+```py
 cursor.execute("SELECT VERSION()")  # Test database connected
 ```

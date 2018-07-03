@@ -3,8 +3,9 @@ import json
 
 # Project Imports
 from utils import get_json_arg, get_filtered
-from models.item import TodoItemsModel
-items = []
+from models.item import TodoItemsModel, TodoItemModel
+
+items = TodoItemsModel.query_all()
 
 
 class PageHandler(RequestHandler):
@@ -14,13 +15,12 @@ class PageHandler(RequestHandler):
         self.write(data)
 
     def json_error(self):
-        self.json_response({'message': 'body is empty'}, 404)
+        self.json_response({'message': 'request body is empty'}, 404)
 
 
 class TodoItems(PageHandler):
     def get(self):
-        result = TodoItemsModel.query_all()
-        self.json_response(json.dumps(result))
+        self.json_response(json.dumps(items))
 
 
 class TodoItem(PageHandler):
@@ -34,9 +34,9 @@ class TodoItem(PageHandler):
 
     def post(self, id=None):
         if self.request.body:
-            item = get_json_arg(self.request.body, ['name', 'id'])
-            items.append(item)
-            self.json_response(item, 201)
+            item = get_json_arg(self.request.body, ['name'])
+            TodoItemModel.insert_new_item(item)
+            self.json_response({'message': 'item created'}, 201)
         else:
             self.json_error()
 
