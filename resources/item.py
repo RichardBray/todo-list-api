@@ -3,9 +3,9 @@ import json
 
 # Project Imports
 from utils import get_json_arg, get_filtered
-from models.item import TodoItemsModel, TodoItemModel
+from models.mysql import Items
 
-items = TodoItemsModel.query_all()
+items = []
 
 
 class PageHandler(RequestHandler):
@@ -19,8 +19,20 @@ class PageHandler(RequestHandler):
 
 
 class TodoItems(PageHandler):
+    """
+    Query all comes back as tuple so this converts
+    it to a list of dicts
+    """
+    table_data = Items.query_all()
+
+    data = []
+    if len(table_data) != 0:
+        for row in table_data:
+            data.append({'id': row[0], 'name': row[1]})
+
+
     def get(self):
-        self.json_response(json.dumps(items))
+        self.json_response(json.dumps(data))
 
 
 class TodoItem(PageHandler):
@@ -35,7 +47,7 @@ class TodoItem(PageHandler):
     def post(self, id=None):
         if self.request.body:
             item = get_json_arg(self.request.body, ['name'])
-            TodoItemModel.insert_new_item(item)
+            Items.inset_single('name', item['name'])
             self.json_response({'message': 'item created'}, 201)
         else:
             self.json_error()

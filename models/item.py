@@ -1,18 +1,18 @@
 import MySQLdb
 
 
-def connect_to_db():
+def connect_to_db:
     return MySQLdb.connect("localhost", "root", "", "todo_list")
 
 
-def query_execution():
+def query_execution:
     """
     Simple query execution
     """
     pass
 
 
-class TodoItemsModel():
+class TodoItemsModel:
     @staticmethod
     def query_all():
         db = connect_to_db()
@@ -31,7 +31,7 @@ class TodoItemsModel():
         return items
 
 
-class TodoItemModel():
+class TodoItemModel:
     @staticmethod
     def insert_new_item(item):
         db = connect_to_db()
@@ -43,7 +43,7 @@ class TodoItemModel():
         db.close()
 
     def delete_item(id):
-        # TODO need to finish this
+        # TODO need to finish this, needs static method
         db = connect_to_db()
         cursor = db.cursor()
         query = "DELETE FROM items WHERE id=?"
