@@ -1,5 +1,6 @@
 import MySQLdb
 
+
 class MySql:
     TABLE = ""
 
@@ -15,12 +16,10 @@ class MySql:
         db.commit()
         db.close()
 
-
     @classmethod
     def insert_single(cls, *args):
         query = "INSERT INTO {} ({}) VALUES('{}')".format(cls.TABLE, args[0], args[1])
         MySql.simpe_query(query)
-
 
     @classmethod
     def query_all(cls, *args):
@@ -35,11 +34,20 @@ class MySql:
 
         return data
 
-
     @classmethod
     def delete_single(cls, id):
         query = "DELETE FROM {} WHERE id={}".format(cls.TABLE, id)
         MySql.simpe_query(query)
+
+    @classmethod
+    def query_single(cls, id):
+        db = MySql.connect_to_db()
+        cursor = db.cursor()
+        query = "SELECT * FROM {} WHERE id={}".format(cls.TABLE, id)
+        cursor.execute(query)
+        data = cursor.fetchall()
+        db.close()
+        return data
 
 
 class Items(MySql):

@@ -35,13 +35,13 @@ class TodoItems(PageHandler):
         self.json_response(json.dumps(data))
 
 
-
 class TodoItem(PageHandler):
 
     def get(self, id=None):
         if id:
-            item = get_filtered(id, items)
-            self.json_response(json.dumps(item[0]))
+            item = Items.query_single(int(id))
+            print(item, id)
+            self.json_response(json.dumps(item))
         else:
             self.json_error()
 
