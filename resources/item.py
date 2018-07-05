@@ -19,20 +19,21 @@ class PageHandler(RequestHandler):
 
 
 class TodoItems(PageHandler):
-    """
-    Query all comes back as tuple so this converts
-    it to a list of dicts
-    """
-    table_data = Items.query_all()
-
-    data = []
-    if len(table_data) != 0:
-        for row in table_data:
-            data.append({'id': row[0], 'name': row[1]})
-
 
     def get(self):
+        """
+        Query all comes back as tuple so this converts
+        it to a list of dicts
+        """
+        table_data = Items.query_all()
+        data = []
+
+        if len(table_data) != 0:
+            for row in table_data:
+                data.append({'id': row[0], 'name': row[1]})
+
         self.json_response(json.dumps(data))
+
 
 
 class TodoItem(PageHandler):
@@ -47,7 +48,7 @@ class TodoItem(PageHandler):
     def post(self, id=None):
         if self.request.body:
             item = get_json_arg(self.request.body, ['name'])
-            Items.inset_single('name', item['name'])
+            Items.insert_single('name', item['name'])
             self.json_response({'message': 'item created'}, 201)
         else:
             self.json_error()
@@ -62,8 +63,6 @@ class TodoItem(PageHandler):
             self.json_response(item)
 
     def delete(self, id):
-        global items
-        new_items = [item for item in items if item['id'] != int(id)]
-        items = new_items
+        Items.delete_single(id)
         message = {'message': 'Item with id {} was deleted'.format(id)}
         self.json_response(message)
