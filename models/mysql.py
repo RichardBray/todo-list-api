@@ -1,4 +1,5 @@
 import MySQLdb
+import MySQLdb.cursors
 
 
 class MySql:
@@ -6,7 +7,9 @@ class MySql:
 
     @staticmethod
     def connect_to_db():
-        return MySQLdb.connect("localhost", "root", "", "todo_list")
+        return MySQLdb.connect(
+            "localhost", "root", "", "todo_list",
+            cursorclass=MySQLdb.cursors.DictCursor)
 
     @staticmethod
     def simpe_query(query):
@@ -18,11 +21,12 @@ class MySql:
 
     @classmethod
     def insert_single(cls, *args):
-        query = "INSERT INTO {} ({}) VALUES('{}')".format(cls.TABLE, args[0], args[1])
+        query = "INSERT INTO {} ({}) VALUES('{}')".format(
+            cls.TABLE, args[0], args[1])
         MySql.simpe_query(query)
 
     @classmethod
-    def query_all(cls, *args):
+    def query_all(cls):
         db = MySql.connect_to_db()
         cursor = db.cursor()
 
@@ -31,8 +35,8 @@ class MySql:
 
         data = cursor.fetchall()
         db.close()
-
-        return data
+        print(data)
+        return data  # returns tuple
 
     @classmethod
     def delete_single(cls, id):
