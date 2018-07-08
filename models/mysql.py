@@ -19,6 +19,15 @@ class MySql:
         db.commit()
         db.close()
 
+    @staticmethod
+    def fetchall_query(query):
+        db = MySql.connect_to_db()
+        cursor = db.cursor()
+        cursor.execute(query)
+        data = cursor.fetchall()
+        db.close()
+        return data
+
     @classmethod
     def insert_single(cls, *args):
         query = "INSERT INTO {} ({}) VALUES('{}')".format(
@@ -27,16 +36,8 @@ class MySql:
 
     @classmethod
     def query_all(cls):
-        db = MySql.connect_to_db()
-        cursor = db.cursor()
-
         query = "SELECT * FROM {}".format(cls.TABLE)
-        cursor.execute(query)
-
-        data = cursor.fetchall()
-        db.close()
-        print(data)
-        return data  # returns tuple
+        return MySql.fetchall_query(query)
 
     @classmethod
     def delete_single(cls, id):
@@ -45,13 +46,14 @@ class MySql:
 
     @classmethod
     def query_single(cls, id):
-        db = MySql.connect_to_db()
-        cursor = db.cursor()
         query = "SELECT * FROM {} WHERE id={}".format(cls.TABLE, id)
-        cursor.execute(query)
-        data = cursor.fetchall()
-        db.close()
-        return data
+        return MySql.fetchall_query(query)
+
+    @classmethod
+    def update_single(cls, *args):
+        query = "UPDATE {} SET {} = '{}' WHERE id = {}".format(
+            cls.TABLE, args[0], args[1], args[2])
+        MySql.simpe_query(query)
 
 
 class Items(MySql):

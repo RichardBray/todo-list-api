@@ -40,6 +40,12 @@ Choose database
 USE <database_name>
 ```
 
+Show all tables in database
+
+```sql
+SHOW tables;
+```
+
 ```py
 cursor.execute("SELECT VERSION()")  # Test database connected
 ```
