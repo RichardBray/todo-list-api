@@ -1,22 +1,24 @@
 import MySQLdb
 
-# instance, user, password, database
-db = MySQLdb.connect("localhost", "root", "", "todo_list")
 
-cursor = db.cursor()
+def create_all():
+    # instance, user, password, database
+    db = MySQLdb.connect("localhost", "root", "", "todo_list")
 
-create_table = """
-                DROP TABLE IF EXISTS items;
-                CREATE TABLE items (
-                id int(9) auto_increment primary key,
-                name char(20))"""
+    cursor = db.cursor()
 
-cursor.execute(create_table)
+    create_table = """
+                    DROP TABLE IF EXISTS items;
+                    CREATE TABLE items (
+                    id int(9) auto_increment primary key,
+                    name char(20))"""
 
-results = cursor.fetchall()
+    cursor.execute(create_table)
 
-print(results)
-# data = cursor.fetchone()  # Fetch a single row
-# print("Database version : %s " % data)
+    results = cursor.fetchall()
 
-db.close()
+    print(results)
+    # data = cursor.fetchone()  # Fetch a single row
+    # print("Database version : %s " % data)
+
+    db.close()

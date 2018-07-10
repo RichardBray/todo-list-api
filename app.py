@@ -25,4 +25,5 @@ def run_server():
 
 
 if __name__ == '__main__':
+    # import and run database
     run_server()
