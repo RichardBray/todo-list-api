@@ -1,9 +1,11 @@
+import os
 import MySQLdb
 
 
 def create_all():
     # instance, user, password, database
     db = MySQLdb.connect("localhost", "root", "", "todo_list")
+    os.enrion.get('DATABASE_URL', "localhost")
 
     cursor = db.cursor()
 
