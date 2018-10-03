@@ -15,11 +15,6 @@ The title pretty much explains it.
 
 `pip freeze > requirements.txt`
 
-### MySQLdb
-
-`pip install mysqlclient`
-
-
 ### List comprehension
 
 ```py
