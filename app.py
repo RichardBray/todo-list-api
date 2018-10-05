@@ -4,90 +4,31 @@ import json
 
 items = []
 
-
-def get_json_arg(req_body, fields):
-  """
-  Gets argument from JSON
-  """
-  results = {}
-  for i in fields:
-      results[i] = json.loads(req_body).get(i)
-  return results
-
-
-def get_filtered(id):
-  """
-  Filters list to pick one item
-  """
-  result = [item for item in items if item['id'] == int(id)]
-  return result
-
-
-class PageHandler(RequestHandler):
-  def json_response(self, data, status_code=200):
-    self.set_status(status_code)
-    self.set_header("Content-Type", 'application/json')
-    self.write(data)
-
-  def json_error(self):
-    self.json_response({'message': 'body is empty'}, 404)
-
-
-class TodoItems(PageHandler):
+class TodoItems(RequestHandler):
   def get(self):
-    self.json_response(json.dumps(items))
+    self.write({'items': items})
 
 
-class TodoItem(PageHandler):
-
-  def get(self, id):
-    if id:
-      item = get_filtered(id)
-      self.json_response(json.dumps(item[0]))
-    else:
-      self.json_error()
-
-  def post(self, id):
-    # print(id)
-    if self.request.body:
-      item = get_json_arg(self.request.body, ['name', 'id'])
-      items.append(item)
-      self.json_response(item, 201)
-    else:
-      self.json_error()
-
-  def put(self, id):
-    picked_item = get_filtered(id)
-    if picked_item:
-      items.remove(picked_item[0])
-      item = get_json_arg(self.request.body, ['name'])
-      item['id'] = int(id)
-      items.append(item)
-      self.json_response(item)
+class TodoItem(RequestHandler):
+  def post(self, _):
+    items.append(json.loads(self.request.body))
+    self.write({'message': 'new item added'})
 
   def delete(self, id):
     global items
-    new_items = [item for item in items if item['id'] != int(id)]
+    new_items = [item for item in items if item['id'] is not int(id)]
     items = new_items
-    message = {'message': 'Item with id {} was deleted'.format(id)}
-    self.json_response(message)
+    self.write({'message': 'Item with id %s was deleted' % id})
 
 
 def make_app():
   urls = [
-    (r"/", TodoItems),
+    ("/", TodoItems),
     (r"/api/item/([^/]+)?", TodoItem)
   ]
-
-  server_settings = {
-    "debug": True,
-    "autoreload": True
-  }
-
-  return Application(urls, **server_settings)
-
-
+  return Application(urls, debug=True)
+  
 if __name__ == '__main__':
-    app = make_app()
-    app.listen(3000)
-    IOLoop.instance().start()
+  app = make_app()
+  app.listen(3000)
+  IOLoop.instance().start()
